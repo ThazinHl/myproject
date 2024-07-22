@@ -1,8 +1,7 @@
 
-
-
 import 'package:flutter/material.dart';
-import 'data.dart';
+import 'api_service.dart'; // Make sure this is the correct import path for your ApiService
+import 'dart:math';
 class BudgetCodeScreen extends StatefulWidget {
   const BudgetCodeScreen({super.key});
 
@@ -11,15 +10,47 @@ class BudgetCodeScreen extends StatefulWidget {
 }
 
 class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
-   List<Budget> _budgetCodes = getbcode();
+  final TextStyle columnHeaderStyle = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+    color: Color.fromARGB(255, 0, 0, 0),
+  );
+
+  List<Budget> _budgetCodes = [];
   String filter = '';
   bool _sortAscending = true;
   int _sortColumnIndex = 0;
+  int _nextId = 1;
+
+String generateRandomId(int length) {                                   // auto enter in id string  
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  Random rnd = Random();
+  return List.generate(length, (_) => chars[rnd.nextInt(chars.length)]).join();
+}
+  @override
+  void initState() {
+    super.initState();
+    _fetchBudgetCodes();
+  }
+
+  void _fetchBudgetCodes() async {
+    try {
+      List<Budget> budgetCodes = await ApiService().fetchBudgetCodes();
+      setState(() {
+        _budgetCodes = budgetCodes;
+        if (_budgetCodes.isNotEmpty) {
+          _nextId = _budgetCodes.map((b) => int.parse(b.code.split('-')[1])).reduce((a, b) => a > b ? a : b) + 1;
+        }
+      });
+    } catch (e) {
+      print('Failed to load budget codes: $e');
+    }
+  }
 
   void _showAddDialog() {
-    final TextEditingController codeController = TextEditingController();
+     TextEditingController codeController= TextEditingController(text: 'B-${_nextId.toString().padLeft(3, '0')}');
     final TextEditingController descriptionController = TextEditingController();
-    String status = 'Active';
+    bool status = true;
 
     showDialog(
       context: context,
@@ -29,15 +60,20 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+             // Text('Budget Code: B-${_nextId.toString().padLeft(3, '0')}', style: TextStyle(fontSize: 16)),
               TextField(
-                controller: codeController,
-                decoration: InputDecoration(labelText: 'Budget Code', border: OutlineInputBorder(),),
-              ),SizedBox(height: 30),
+              controller: codeController,
+              decoration: InputDecoration(
+                labelText: 'Budget Code',
+                border: OutlineInputBorder(),
+              ),readOnly: true,
+            ),
+              SizedBox(height: 30),
               TextField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description', border: OutlineInputBorder(),),
+                decoration: InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
               ),
-            
+              SizedBox(height: 30),
             ],
           ),
           actions: [
@@ -47,18 +83,24 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
               },
               child: Text('Cancel'),
             ),
-             TextButton(
-              onPressed: () {
-                setState(() {
-                  _budgetCodes.add(
-                    Budget(
-                      codeController.text,
-                      descriptionController.text,
-                      status,
-                    ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  Budget newBudget = Budget(
+                    id: generateRandomId(4), // Generate a random 4-character string
+                    code: 'B-${_nextId.toString().padLeft(3, '0')}',
+                    description: descriptionController.text,
+                    status: status,
                   );
-                });
-                Navigator.of(context).pop();
+                  await ApiService().addBudgetCode(newBudget);
+                  setState(() {
+                    _budgetCodes.add(newBudget);
+                    _nextId++;
+                  });
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  print('Failed to add budget code: $e');
+                }
               },
               child: Text('Add'),
             ),
@@ -68,11 +110,10 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
     );
   }
 
- void showEditDialog(Budget budget) {
-   final TextEditingController codeController = TextEditingController(text: budget.code);
+  void showEditDialog(Budget budget) {
+    TextEditingController codeController = TextEditingController(text: budget.code);
     final TextEditingController descriptionController = TextEditingController(text: budget.description);
-    String status = budget.status;
-
+    bool status = budget.status;
 
     showDialog(
       context: context,
@@ -83,31 +124,30 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: codeController,
-                decoration: InputDecoration(labelText: 'Budget Code', border: OutlineInputBorder(),),
-              ),
+              controller: codeController,
+              decoration: InputDecoration(
+                labelText: 'Budget Code',
+                border: OutlineInputBorder(),
+              ),readOnly: true,
+            ),
               SizedBox(height: 30),
               TextField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description', border: OutlineInputBorder(),),
+                decoration: InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
               ),
               SizedBox(height: 30),
-               DropdownButtonFormField<String>(
-                value: status,
-                items: ['Active', 'Inactive']
-                    .map((status) => DropdownMenuItem(
-                          value: status,
-                          child: Text(status),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    status = value;
-                  }
-                },
-                decoration: InputDecoration(labelText: 'Status'),
+              Row(
+                children: [
+                  Switch(
+                    value: status,
+                    onChanged: (value) {
+                      setState(() {
+                        status = value;
+                      });
+                    },
+                  ),
+                ],
               ),
-
             ],
           ),
           actions: [
@@ -118,14 +158,25 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                /*  budget.code= codeController.text;
-                  budget.description= descriptionController.text;
-                  budget.status = status;*/
-                  
-                });
-                Navigator.of(context).pop();
+              onPressed: () async {
+                try {
+                  Budget updatedBudget = Budget(
+                    id: budget.id,
+                    code: budget.code,
+                    description: descriptionController.text,
+                    status: status,
+                  );
+                  await ApiService().updateBudgetCode(updatedBudget);
+                  setState(() {
+                    int index = _budgetCodes.indexWhere((b) => b.id == budget.id);
+                    if (index != -1) {
+                      _budgetCodes[index] = updatedBudget;
+                    }
+                  });
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  print('Failed to update budget code: $e');
+                }
               },
               child: Text('Save'),
             ),
@@ -135,15 +186,18 @@ class _BudgetCodeScreenState extends State<BudgetCodeScreen> {
     );
   }
 
- void deleteBudgetCode(Budget budget) {
-    setState(() {
-      _budgetCodes.remove(budget);
-    });
+  void deleteBudgetCode(Budget budget) async {
+    try {
+      await ApiService().deleteBudgetCode(budget.id);
+      setState(() {
+        _budgetCodes.remove(budget);
+      });
+    } catch (e) {
+      print('Failed to delete budget code: $e');
+    }
   }
 
-
-  //detail
-void Budgetdetail(Budget budget) {
+  void Budgetdetail(Budget budget) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -152,15 +206,14 @@ void Budgetdetail(Budget budget) {
     );
   }
 
-  //filter
- List<Budget> get _filteredBudgetCodes {
+  List<Budget> get _filteredBudgetCodes {
     if (filter.isEmpty) {
       return _budgetCodes;
     } else {
       return _budgetCodes.where((code) {
         return code.code.contains(filter) ||
             code.description.contains(filter) ||
-            code.status.contains(filter);
+            (code.status ? 'Active' : 'Inactive').contains(filter);
       }).toList();
     }
   }
@@ -181,116 +234,121 @@ void Budgetdetail(Budget budget) {
       _sortAscending = ascending;
     });
   }
-    
+
   @override
   Widget build(BuildContext context) {
-   return Column(
+    return Column(
       children: [
-        Container(child: Text('Budget Codes',style:TextStyle(fontSize:25))),
-      
-      Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // Aligns widgets to the end
-        children: [
-          
-SizedBox(
-  width: 100, // Specifies the width of the TextField
-  child: TextField(
-    decoration: InputDecoration(
-       suffixIcon: Icon(Icons.filter_list),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        filter = value;
-                      });
-                    },
+        Container(child: Text('Budget Codes', style: TextStyle(fontSize: 25))),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end, // Aligns widgets to the end
+            children: [
+              SizedBox(
+                width: 100, // Specifies the width of the TextField
+                child: TextField(
+                  decoration: InputDecoration(
+                    suffixIcon: Icon(Icons.filter_list),
                   ),
-                ),
-
-          IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: _showAddDialog,
-                ),
-                IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: () {
+                  onChanged: (value) {
                     setState(() {
-                      _budgetCodes = getbcode();
+                      filter = value;
                     });
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.download),
-                  onPressed: () {
-                    // Define your download action here
-                  },
-          ),
-
-
-        ],
-      ),
-    ),
-        
-         Container(
-        width: 1500,
-          child: SingleChildScrollView(
-         child: DataTable(
-          border: TableBorder.all(),
-                sortColumnIndex: _sortColumnIndex,
-                sortAscending: _sortAscending,
-                columns: [
-                  DataColumn(
-                    label: Text('Budget Code'),
-                    onSort: (int columnIndex, bool ascending) =>
-                        _sort<String>((Budget budget) => budget.code, columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: Text('Description'),
-                    onSort: (int columnIndex, bool ascending) =>
-                        _sort<String>((Budget budget) => budget.description, columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: Text('Status'),
-                    onSort: (int columnIndex, bool ascending) =>
-                        _sort<String>((Budget budget) => budget.status, columnIndex, ascending),
-                  ),
-                  DataColumn(label: Text('Actions')),
-                ],
-
-
-                rows: _filteredBudgetCodes.map((budget) {
-                  return DataRow(cells: [
-                    DataCell(Text(budget.code)),
-                    DataCell(Text(budget.description)),
-                    DataCell(Text(budget.status)),
-                    DataCell(Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () => showEditDialog(budget),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () => deleteBudgetCode(budget),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.details),
-                          onPressed: () => Budgetdetail(budget),
-                        ),
-                      ],
-                    )),
-                  ]);
-                }).toList(),
               ),
-          ))
-       
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: _showAddDialog,
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: _fetchBudgetCodes,
+              ),
+              IconButton(
+                icon: Icon(Icons.download),
+                onPressed: () {
+                  // Define your download action here
+                },
+              ),
+            ],
+          ),
+        ),
+        Container(
+          child: SingleChildScrollView(
+            child: DataTable(
+              border: TableBorder.all(),
+              sortColumnIndex: _sortColumnIndex,
+              sortAscending: _sortAscending,
+              columns: [
+                DataColumn(
+                  label: Text('Budget Code', style: columnHeaderStyle),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<String>((Budget budget) => budget.code, columnIndex, ascending),
+                ),
+                DataColumn(
+                  label: Text('Description', style: columnHeaderStyle),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<String>((Budget budget) => budget.description, columnIndex, ascending),
+                ),
+                DataColumn(
+                  label: Text('Status', style: columnHeaderStyle),
+                ),
+                DataColumn(
+                  label: Text('Actions', style: columnHeaderStyle),
+                ),
+              ],
+              rows: _filteredBudgetCodes.map((budget) {
+                return DataRow(cells: [
+                  DataCell(
+                    Container(
+                      width: 200, // Adjust to the desired width
+                      child: Text(budget.code),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 600, // Adjust to the desired width
+                      child: Text(budget.description),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 200, // Adjust to the desired width
+                      child: Text(budget.status ? 'Active' : 'Inactive'),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 200, // Adjust to the desired width
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () => showEditDialog(budget),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () => deleteBudgetCode(budget),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.details),
+                            onPressed: () => Budgetdetail(budget),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ]);
+              }).toList(),
+            ),
+          ),
+        ),
       ],
     );
   }
 }
-
-
 
 class Bdetail extends StatelessWidget {
   final Budget budgetCode;
@@ -302,26 +360,21 @@ class Bdetail extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Budget Code Details'),
-        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Budget Code: ${budgetCode.code}', style: TextStyle(fontSize: 18)),
-              SizedBox(height: 8),
-              Text('Description: ${budgetCode.description}', style: TextStyle(fontSize: 18)),
-              SizedBox(height: 8),
-              Text('Status: ${budgetCode.status}', style: TextStyle(fontSize: 18)),
-            ],
-          ),
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Code: ${budgetCode.code}', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 8),
+            Text('Description: ${budgetCode.description}', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 8),
+            Text('Status: ${budgetCode.status ? 'Active' : 'Inactive'}', style: TextStyle(fontSize: 16)),
+          ],
         ),
       ),
     );
   }
 }
-
-
 

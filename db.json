@@ -1,0 +1,28 @@
+{
+  "budgets": [
+    {
+      "id": "1",
+      "code": "B-001",
+      "description": "Marketing",
+      "status": true
+    },
+    {
+      "id": "2",
+      "code": "B-002",
+      "description": "Transport",
+      "status": false
+    },
+    {
+      "id": "3",
+      "code": "B-003",
+      "description": "Project",
+      "status": true
+    },
+    {
+      "id": "4",
+      "code": "B-004",
+      "description": "trip",
+      "status": true
+    }
+  ]
+}
