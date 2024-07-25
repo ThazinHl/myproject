@@ -262,7 +262,7 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
                               ),
                             ),
                           ),
-            if(project_bcodetable)
+           if(project_bcodetable)
            Container(
             width:300,
           child: SingleChildScrollView(
@@ -286,6 +286,7 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
             
           ),
         ),
+         
 
 if (trip_bcodetable)
   Container(
@@ -347,9 +348,7 @@ if (trip_bcodetable)
 
 
 
-
 void showProjectDialog() {
-  
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -360,14 +359,17 @@ void showProjectDialog() {
             content: SingleChildScrollView(
               child: ProjectTable(
                 projects: getproject(),
-                onRowSelected: (String selectedProjectCode) {
+                onRowSelected: (String selectedProjectCode) { 
                   setState(() {
+                     
                     rcodeController.text = selectedProjectCode;
-                   // Project selectedProject = getproject().firstWhere((project) => project.pcode == selectedProjectCode);
-                   // selectedProjectBudgets = getbcode().where((budget) => selectedProject.bcode.contains(budget.code)).toList();
-                    project_bcodetable = true; // Set to true to show the budget table
-                  });
+               
+                  Project selectedProject = getproject().firstWhere((project) => project.pcode == selectedProjectCode);
+                    selectedProjectBudgets = getbcode().where((budget) => selectedProject.bcode.contains(budget.code)).toList();
+                    project_bcodetable = true; // Show the project table
+                  });// Delay the pop to ensure the UI updates before closing the dialog
                 },
+                // selectedProjectBudgets: selectedProjectBudgets, // Pass the updated list
               ),
             ),
             actions: [
@@ -384,6 +386,7 @@ void showProjectDialog() {
     },
   );
 }
+
 void showTripDialog() {
   showDialog(
     context: context,
@@ -595,8 +598,11 @@ SizedBox(
 class ProjectTable extends StatelessWidget {
   final List<Project> projects;
   final void Function(String) onRowSelected;
-
-  const ProjectTable({required this.projects, required this.onRowSelected, Key? key}) : super(key: key);
+  //final List<Budget> selectedProjectBudgets; // Add this line
+  
+  const ProjectTable({required this.projects, required this.onRowSelected,
+  // this.selectedProjectBudgets = const [],
+   Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -616,15 +622,18 @@ class ProjectTable extends StatelessWidget {
             DataCell(Text(project.pcode)),
             DataCell(Text(project.pdes)),
             DataCell(Text(project.bcode.join(', '))), // Display budget codes as a comma-separated string
-            DataCell(Text(project.tbmount+project.pcurrency)),
-            DataCell(Text(project.apmount)),
+            DataCell(Text(project.tbmount.toString()+project.pcurrency)),
+            DataCell(Text(project.apmount.toString())),
             DataCell(Text(project.pstatus)),
             DataCell(Text(project.preq)),
           ],
           onSelectChanged: (bool? selected) {
             if (selected ?? false) {
               onRowSelected(project.pcode);
+             //Navigator.of(context).pop();
+             Future.delayed(Duration(milliseconds: 100), () {
              Navigator.of(context).pop();
+  });
             }
           },
         );
@@ -656,8 +665,8 @@ class TripTable extends StatelessWidget {
           DataCell(Text(trip.tcode)),
           DataCell(Text(trip.tdes)),
            DataCell(Text(trip.bcode.join(', '))), // Display budget codes as a comma-separated string
-          DataCell(Text(trip.tbmount+trip.tcurrency)),
-          DataCell(Text(trip.apmount)),
+          DataCell(Text(trip.tbmount.toString()+trip.tcurrency)),
+          DataCell(Text(trip.apmount.toString())),
           DataCell(Text(trip.tstatus)),
         ],
          onSelectChanged: (bool? selected) {
