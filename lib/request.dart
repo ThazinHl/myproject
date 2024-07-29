@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'data.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'api_service.dart';
 class RequestScreen extends StatefulWidget {
   const RequestScreen({super.key});
 
@@ -23,7 +23,6 @@ class RequestScreenState extends State<RequestScreen> {
   List<Budget> selectedProjectBudgets = [];
   List<Budget> selectedTripBudgets = [];
 
-   List<Request> request = getrequest();
 String filter = '';
   bool _sortAscending = true;
   int _sortColumnIndex = 0;
@@ -32,7 +31,6 @@ String? _fileName;
   String? _filePath;
 final TextEditingController rnoController = TextEditingController(text:'Req-2425-003');
     final TextEditingController rnameController = TextEditingController(text: "Ma Ma");
-     //final TextEditingController rcurrency = TextEditingController(text: "Choose");
      final TextEditingController rmountController = TextEditingController();
     final TextEditingController rpurposeController = TextEditingController();
     final TextEditingController rdateController =TextEditingController(text: "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}");
@@ -40,6 +38,35 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
      final TextEditingController radminController = TextEditingController(text: "Mg Mg");
      String rtype = 'Project';
      String rcurrency='MMK';
+
+ List<Request> requests = [];
+  List<Project> projects = [];
+  List<Trip> trips = [];
+  List<Budget> budgets = [];
+  @override
+  void initState() {
+    super.initState();
+    _fetchRequest();
+    
+  }
+
+  void _fetchRequest() async {
+    try {
+      List<Request> requested = await ApiService().fetchRequests();
+      List<Budget> budgeted = await ApiService().fetchBudgets();
+        List<Project> projected = await ApiService().fetchProjects();
+          List<Trip> triped = await ApiService().fetchTrips();
+      setState(() {
+        requests = requested;
+         budgets = budgeted;
+          projects = projected;
+           trips = triped;
+
+      });
+    } catch (e) {
+      print('Failed to load budget codes: $e');
+    }
+  }
 
   void pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -213,7 +240,7 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
                             : ''),
                         if (showMultiSelect)
                          MultiSelectDialogField<Budget>(
-                        items: getbcode()
+                        items: budgets
                             .map((budget) => MultiSelectItem<Budget>(
                                   budget,
                                   budget.code,
@@ -358,14 +385,14 @@ void showProjectDialog() {
             title: Text('Project Table'),
             content: SingleChildScrollView(
               child: ProjectTable(
-                projects: getproject(),
+                projects: projects,
                 onRowSelected: (String selectedProjectCode) { 
                   setState(() {
                      
                     rcodeController.text = selectedProjectCode;
                
-                  Project selectedProject = getproject().firstWhere((project) => project.pcode == selectedProjectCode);
-                    selectedProjectBudgets = getbcode().where((budget) => selectedProject.bcode.contains(budget.code)).toList();
+                  Project selectedProject = projects.firstWhere((project) => project.pcode == selectedProjectCode);
+                    selectedProjectBudgets = budgets.where((budget) => selectedProject.bcode.contains(budget.code)).toList();
                     project_bcodetable = true; // Show the project table
                   });// Delay the pop to ensure the UI updates before closing the dialog
                 },
@@ -395,13 +422,13 @@ void showTripDialog() {
         title: Text('Trip Table'),
         content: SingleChildScrollView(
           child: TripTable(
-            trips: gettrip(),
+            trips: trips,
             onRowSelected: (String selectedTripCode) {
               setState(() {
                 rcodeController.text = selectedTripCode;
                 Trip selectedTrip =
-                    gettrip().firstWhere((trip) => trip.tcode == selectedTripCode);
-                selectedTripBudgets = getbcode()
+                    trips.firstWhere((trip) => trip.tcode == selectedTripCode);
+                selectedTripBudgets = budgets
                     .where((budget) => selectedTrip.bcode.contains(budget.code))
                     .toList();
                 trip_bcodetable = true; 
@@ -428,9 +455,9 @@ void showTripDialog() {
  List<Request> get filteredRequest {
    
   if(filter.isEmpty){
-    return request;
+    return requests;
   }else{
-    return request.where((code){
+    return requests.where((code){
        return code.rno.contains(filter) ||
             code.rcode.contains(filter) ||
             code. rmount.toString().contains(filter) ||
@@ -507,7 +534,7 @@ SizedBox(
                 Icon(Icons.refresh),
               ],
             ),
-            onPressed: null,
+            onPressed: _fetchRequest,
           ),
 
           IconButton(
@@ -598,14 +625,15 @@ SizedBox(
 class ProjectTable extends StatelessWidget {
   final List<Project> projects;
   final void Function(String) onRowSelected;
-  //final List<Budget> selectedProjectBudgets; // Add this line
-  
-  const ProjectTable({required this.projects, required this.onRowSelected,
-  // this.selectedProjectBudgets = const [],
-   Key? key}) : super(key: key);
+  const ProjectTable({required this.projects, required this.onRowSelected, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
+    // Filter projects based on pstatus and preq
+    final filteredProjects = projects.where((project) =>
+        project.pstatus == 'Active' && project.preq == 'yes').toList();
+
     return DataTable(
       columns: [
         DataColumn(label: Text('Project Code')),
@@ -616,7 +644,7 @@ class ProjectTable extends StatelessWidget {
         DataColumn(label: Text('Status')),
         DataColumn(label: Text('Requestable')),
       ],
-      rows: projects.map((project) {
+      rows: filteredProjects.map((project) {
         return DataRow(
           cells: [
             DataCell(Text(project.pcode)),
@@ -651,6 +679,8 @@ class TripTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     // Filter projects based on pstatus and preq
+    final filteredTrips = trips.where((trip) =>trip.tstatus == 'Active').toList();
     return DataTable(
       columns: [
         DataColumn(label: Text('Trip Code')),
@@ -660,7 +690,7 @@ class TripTable extends StatelessWidget {
         DataColumn(label: Text('Approved Amount')),
         DataColumn(label: Text('Status')),
       ],
-      rows: trips.map((trip) {
+      rows: filteredTrips.map((trip) {
         return DataRow(cells: [
           DataCell(Text(trip.tcode)),
           DataCell(Text(trip.tdes)),

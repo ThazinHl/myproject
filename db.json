@@ -35,11 +35,11 @@
       "rcurrency": "MMK",
       "rpurpose": "First project request",
       "requester_id": 1,
-      "rdate": "8/7/2024",
+      "rdate": "8-7-2024",
       "approver1_id": 1,
       "approver2_id": 2,
       "approver3_id": 3,
-      "approver_date": "10/7/2024",
+      "approver_date": "10-7-2024",
       "rstatus": "Approved",
       "rfile": "r.jpg"
     },
@@ -52,7 +52,7 @@
       "rcurrency": "MMK",
       "rpurpose": "For second project request",
       "requester_id": 2,
-      "rdate": "8/7/2024",
+      "rdate": "8-7-2024",
       "approver1_id": 2,
       "approver2_id": 2,
       "approver3_id": 3,
@@ -69,7 +69,7 @@
       "rcurrency": "USD",
       "rpurpose": "First Trip request",
       "requester_id": 1,
-      "rdate": "8/7/2024",
+      "rdate": "8-7-2024",
       "approver1_id": 1,
       "approver2_id": 2,
       "approver3_id": 3,
@@ -78,11 +78,93 @@
       "rfile": "rt.jpg"
     }
   ],
+  "projects": [
+    {
+      "id": "1",
+      "pcode": "PRJ-2425-001",
+      "pdes": "project",
+      "bcode": [
+        "B-001",
+        "B-002",
+        "B-003"
+      ],
+      "tbmount": 1000,
+      "pcurrency": "USD",
+      "apmount": 0,
+      "pstatus": "Active",
+      "preq": "no"
+    },
+    {
+      "id": "2",
+      "pcode": "PRJ-2425-002",
+      "pdes": "project",
+      "bcode": [
+        "B-001"
+      ],
+      "tbmount": 100000,
+      "pcurrency": "MMK",
+      "apmount": 0,
+      "pstatus": "Active",
+      "preq": "no"
+    },
+    {
+      "id": "3",
+      "pcode": "PRJ-2425-003",
+      "pdes": "project",
+      "bcode": [
+        "B-002"
+      ],
+      "tbmount": 500000,
+      "pcurrency": "MMK",
+      "apmount": 0,
+      "pstatus": "Active",
+      "preq": "yes"
+    }
+  ],
+  "trips": [
+    {
+      "id": "1",
+      "tcode": "TRP-2425-001",
+      "tdes": "travel",
+      "bcode": [
+        "B-001"
+      ],
+      "tbmount": 1000,
+      "tcurrency": "USD",
+      "apmount": 0,
+      "tstatus": "Active"
+    },
+    {
+      "id": "2",
+      "tcode": "TRP-2425-002",
+      "tdes": "party",
+      "bcode": [
+        "B-001",
+        "B-002"
+      ],
+      "tbmount": 100000,
+      "tcurrency": "MMK",
+      "apmount": 0,
+      "tstatus": "Inactive"
+    },
+    {
+      "id": "3",
+      "tcode": "TRP-2425-003",
+      "tdes": "party",
+      "bcode": [
+        "B-003"
+      ],
+      "tbmount": 500000,
+      "tcurrency": "MMK",
+      "apmount": 0,
+      "tstatus": "Active"
+    }
+  ],
   "payments": [
     {
       "id": "1",
       "pno": "Req-2425-001-1",
-      "pdate": "8/7/2024",
+      "pdate": "8-7-2024",
       "pmethod": "Cash",
       "wdmount": 500000,
       "pmount": 300000,
@@ -96,7 +178,7 @@
     {
       "id": "2",
       "pno": "Req-2425-001-2",
-      "pdate": "8/7/2024",
+      "pdate": "8-7-2024",
       "pmethod": "Bank",
       "wdmount": 500000,
       "pmount": 300000,
@@ -110,7 +192,7 @@
     {
       "id": "3",
       "pno": "Req-2425-002-1",
-      "pdate": "10/7/2024",
+      "pdate": "10-7-2024",
       "pmethod": "Cash",
       "wdmount": 500,
       "pmount": 300,
@@ -124,7 +206,7 @@
     {
       "id": "4",
       "pno": "Req-2425-002-2",
-      "pdate": "8/7/2024",
+      "pdate": "8-7-2024",
       "pmethod": "Cash",
       "wdmount": 1000000,
       "pmount": 800000,
@@ -138,12 +220,12 @@
     {
       "id": "p2nh",
       "pno": "Req-2425-001-3",
-      "pdate": "2024-7-25",
+      "pdate": "2024-7-28",
       "pmethod": "Cheque",
       "wdmount": 300000,
-      "pmount": 10000,
+      "pmount": 100000,
       "pcurrency": "",
-      "pstatus": "Draft",
+      "pstatus": "Posted",
       "pnote": "for salary",
       "preceive": "myat",
       "ppaid": "mee mee",
@@ -152,16 +234,30 @@
     {
       "id": "6g7g",
       "pno": "Req-2425-002-3",
-      "pdate": "2024-7-25",
+      "pdate": "2024-7-28",
       "pmethod": "Cash",
       "wdmount": 100000,
-      "pmount": 2000,
+      "pmount": 20000,
       "pcurrency": "",
-      "pstatus": "Draft",
+      "pstatus": "Posted",
       "pnote": "for phone bill",
       "preceive": "myat zin",
       "ppaid": "Kyaw",
-      "pfile": ""
+      "pfile": "R.jfif"
+    },
+    {
+      "id": "xvfe",
+      "pno": "Req-2425-003-1",
+      "pdate": "2024-7-28",
+      "pmethod": "Bank",
+      "wdmount": 300,
+      "pmount": 100,
+      "pcurrency": "",
+      "pstatus": "Draft",
+      "pnote": "for party",
+      "preceive": "Hla",
+      "ppaid": "Yee",
+      "pfile": "R.jfif"
     }
   ]
 }

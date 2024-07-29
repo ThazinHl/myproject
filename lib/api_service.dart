@@ -87,13 +87,14 @@ class Budget {
 }*/
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:myproject/data.dart';
 
 class ApiService {
   final String apiUrl = 'http://localhost:3000';
   final String budgetCodesEndpoint = '/budgets'; 
    final String requestEndpoint = '/requests'; 
   final String paymentEndpoint = '/payments'; 
+   final String projectEndpoint = '/projects'; 
+  final String tripEndpoint = '/trips'; 
   Future<List<Budget>> fetchBudgets() async {
     final response = await http.get(Uri.parse(apiUrl+ budgetCodesEndpoint));
     if (response.statusCode == 200) {
@@ -202,9 +203,29 @@ class ApiService {
     }
   }
 
- 
-}
+//for project
+     Future<List<Project>> fetchProjects() async {
+    final response = await http.get(Uri.parse(apiUrl+ projectEndpoint));
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Project.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load projects');
+    }
+  }
+ //for trip
+     Future<List<Trip>> fetchTrips() async {
+    final response = await http.get(Uri.parse(apiUrl+ tripEndpoint));
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Trip.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load trips');
+    }
+  }
 
+}
+//for budget
 class Budget {
   final String id;
   final String code;
@@ -229,6 +250,71 @@ class Budget {
       'description': description,
       'status': status,
     };
+  }
+}
+//for project
+class Project {
+  final String id;
+  final String pcode;
+  final String pdes;
+  final List<String> bcode;
+  final double tbmount;
+  final String pcurrency;
+  final double apmount;
+  final String pstatus;
+  final String preq;
+
+  Project({required this.id,required this.pcode,required this.pdes, required this.bcode,required this.tbmount,required this.pcurrency,required this.apmount,
+    required this.pstatus,required this.preq, });
+
+  factory Project.fromJson(Map<String, dynamic> json) {
+    return Project(
+      id: json['id'],
+      pcode: json['pcode'],
+      pdes: json['pdes'],
+      bcode: List<String>.from(json['bcode']),
+      tbmount: json['tbmount'].toDouble(),
+      pcurrency: json['pcurrency'],
+      apmount: json['apmount'].toDouble(),
+      pstatus: json['pstatus'],
+      preq: json['preq'],
+    );
+  }
+}
+
+//for trip
+class Trip {
+  final String id;
+  final String tcode;
+  final String tdes;
+  final List<String> bcode;
+  final double tbmount;
+  final String tcurrency;
+  final double apmount;
+  final String tstatus;
+
+  Trip({
+    required this.id,
+    required this.tcode,
+    required this.tdes,
+    required this.bcode,
+    required this.tbmount,
+    required this.tcurrency,
+    required this.apmount,
+    required this.tstatus,
+  });
+
+  factory Trip.fromJson(Map<String, dynamic> json) {
+    return Trip(
+      id: json['id'],
+      tcode: json['tcode'],
+      tdes: json['tdes'],
+      bcode: List<String>.from(json['bcode']),
+      tbmount: json['tbmount'].toDouble(),
+      tcurrency: json['tcurrency'],
+      apmount: json['apmount'].toDouble(),
+      tstatus: json['tstatus'],
+    );
   }
 }
 
