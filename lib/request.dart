@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'api_service.dart';
+import 'dart:math';
+
 class RequestScreen extends StatefulWidget {
   const RequestScreen({super.key});
 
@@ -22,6 +24,13 @@ class RequestScreenState extends State<RequestScreen> {
   List<Budget> selectedBudgetCodes = [];
   List<Budget> selectedProjectBudgets = [];
   List<Budget> selectedTripBudgets = [];
+ int _nextId = 1;
+
+String generateRandomId(int length) {                                   // auto enter in id string  
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  Random rnd = Random();
+  return List.generate(length, (_) => chars[rnd.nextInt(chars.length)]).join();
+}
 
 String filter = '';
   bool _sortAscending = true;
@@ -29,7 +38,8 @@ String filter = '';
 
 String? _fileName;
   String? _filePath;
-final TextEditingController rnoController = TextEditingController(text:'Req-2425-003');
+    late final TextEditingController rnoController;
+//final TextEditingController rnoController = TextEditingController(text: 'Req-2425-${_nextId.toString().padLeft(3, '0')}');
     final TextEditingController rnameController = TextEditingController(text: "Ma Ma");
      final TextEditingController rmountController = TextEditingController();
     final TextEditingController rpurposeController = TextEditingController();
@@ -46,6 +56,7 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
   @override
   void initState() {
     super.initState();
+     rnoController = TextEditingController(text: 'Req-2425-${_nextId.toString().padLeft(3, '0')}');
     _fetchRequest();
     
   }
@@ -57,14 +68,22 @@ final TextEditingController rnoController = TextEditingController(text:'Req-2425
         List<Project> projected = await ApiService().fetchProjects();
           List<Trip> triped = await ApiService().fetchTrips();
       setState(() {
+        
         requests = requested;
-         budgets = budgeted;
-          projects = projected;
+         if (requests.isNotEmpty) {
+         // _nextId = requests.map((b) => int.parse(b.rno.split('-')[1])).reduce((a, b) => a > b ? a : b) + 1;
+           int maxId = requests
+              .map((r) => int.tryParse(r.rno.split('-')[2]) ?? 0)
+              .reduce((a, b) => a > b ? a : b);
+          _nextId = maxId + 1;
+        }
+          budgets = budgeted;
+           projects = projected;
            trips = triped;
-
+           rnoController.text = 'Req-2425-${_nextId.toString().padLeft(3, '0')}'; 
       });
     } catch (e) {
-      print('Failed to load budget codes: $e');
+      print('Failed to request: $e');
     }
   }
 
@@ -359,9 +378,39 @@ if (trip_bcodetable)
                 },
                 child: Text('Cancel'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
+               TextButton(
+                onPressed: () async {
+                  // Create Request object from form data
+                  
+                  Request newRequest = Request(
+                    id: generateRandomId(4), // Provide ID if needed
+                    rno: 'Req-2425-${_nextId.toString().padLeft(3, '0')}',
+                    rcode: rcodeController.text,
+                    rmount: double.tryParse(rmountController.text) ?? 0.0,
+                    withdrawnmount: 0.0, // Set default value or modify as needed
+                    rcurrency: rcurrency,
+                    rpurpose: rpurposeController.text,
+                    requester_id: 0, // Set default value or modify as needed
+                    rdate: rdateController.text,
+                    approver1_id: 0, // Set default value or modify as needed
+                    approver2_id: 0, // Set default value or modify as needed
+                    approver3_id: 0, // Set default value or modify as needed
+                    approver_date: '', // Set default value or modify as needed
+                    rstatus: 'Pending', // Set default value or modify as needed
+                    rfile: _filePath ?? '', // Add file path if needed
+                  );
+
+                  try {
+                    await ApiService().addRequest(newRequest);
+                    setState((){
+                       _nextId++;
+                    });
+                    Navigator.of(context).pop(); // Close dialog on success
+                    _fetchRequest(); // Refresh the request list
+                  } catch (e) {
+                    // Handle error
+                    print('Failed to add request: $e');
+                  }
                 },
                 child: Text('Submit'),
               ),

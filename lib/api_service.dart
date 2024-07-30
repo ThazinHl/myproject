@@ -1,90 +1,4 @@
-/*import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class ApiService {
-   //final  String baseUrl = 'http://192.168.100.25:3000';
-  static const String baseUrl = 'http://localhost:3000'; // Replace with your JSON Server URL
-  static const  String budgetCodesEndpoint = '/budgets'; // Make sure this matches your db.json endpoint
-
-  Future<List<Budget>> fetchBudgets() async {
-    final response = await http.get(Uri.parse(baseUrl + budgetCodesEndpoint));
-
-    if (response.statusCode == 200) {
-      List<dynamic> budgets = json.decode(response.body);
-      List<Budget> budgetCodes = budgets.map((json) => Budget.fromJson(json)).toList();
-      return budgetCodes;
-    } else {
-      throw Exception('Failed to load budget codes');
-    }
-  }
-  
-
-  Future<void> addBudget(Budget budget) async {
-    final response = await http.post(
-      Uri.parse(baseUrl + budgetCodesEndpoint),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(budget.toJson()),
-    );
-
-    if (response.statusCode != 201) {
-      throw Exception('Failed to add budget code');
-    }
-  }
-
-  Future<void> updateBudget(Budget budget) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl$budgetCodesEndpoint/${budget.id}'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(budget.toJson()),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update budget code');
-    }
-  }
-
-  Future<void> deleteBudget(String id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl$budgetCodesEndpoint/$id'),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete budget code');
-    }
-  }
-}
-
-class Budget {
-  final String id;
-  final String code;
-  final String description;
-  final bool status;
-
-  Budget({
-    required this.id,
-    required this.code,
-    required this.description,
-    required this.status,
-  });
-
-  factory Budget.fromJson(Map<String, dynamic> json) {
-    return Budget(
-      id: json['id'],
-      code: json['code'],
-      description: json['description'],
-      status: json['status'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'code': code,
-      'description': description,
-      'status': status,
-    };
-  }
-}*/
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -95,6 +9,7 @@ class ApiService {
   final String paymentEndpoint = '/payments'; 
    final String projectEndpoint = '/projects'; 
   final String tripEndpoint = '/trips'; 
+   final String SettlementEndpoint = '/settlements'; 
   Future<List<Budget>> fetchBudgets() async {
     final response = await http.get(Uri.parse(apiUrl+ budgetCodesEndpoint));
     if (response.statusCode == 200) {
@@ -181,7 +96,7 @@ class ApiService {
 
   
     //for request
-     Future<List<Request>> fetchRequests() async {
+     /*Future<List<Request>> fetchRequests() async {
     final response = await http.get(Uri.parse(apiUrl+ requestEndpoint));
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
@@ -189,7 +104,21 @@ class ApiService {
     } else {
       throw Exception('Failed to load requests');
     }
+  }*/
+  Future<List<Request>> fetchRequests() async {
+  try {
+    final response = await http.get(Uri.parse(apiUrl + requestEndpoint));
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Request.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load requests');
+    }
+  } catch (e) {
+    print('Error fetching requests: $e');
+    rethrow;
   }
+}
 
   Future<void> addRequest(Request request) async {
     final response = await http.post(
@@ -221,6 +150,35 @@ class ApiService {
       return body.map((dynamic item) => Trip.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load trips');
+    }
+  }
+  //for settlement
+  Future<List<SettlementInfo>> fetchsettlement() async {
+    final response = await http.get(Uri.parse(apiUrl+SettlementEndpoint));
+   // Make sure this matches your db.json endpoint
+ 
+ 
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((tinfo) => SettlementInfo.fromJson(tinfo)).toList();
+    } else {
+      throw Exception('Failed to load trips');
+    }
+  }
+ 
+  Future<SettlementInfo> createSettle(SettlementInfo settle) async {
+    final response = await http.post(
+      Uri.parse('$apiUrl+$SettlementEndpoint'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(settle.toJson()),
+    );
+ 
+    if (response.statusCode == 201) {
+      return SettlementInfo.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create settlement');
     }
   }
 
@@ -340,7 +298,7 @@ class Request {
 Request({required this.id,required this.rno,required this.rcode,required this.rmount,required this.withdrawnmount,required this.rcurrency,
  required this.rpurpose,required this.requester_id,required this.rdate,required this.approver1_id,required this.approver2_id,required this.approver3_id,required this.approver_date,required this.rstatus,required this.rfile});
   
-  factory  Request.fromJson(Map<String, dynamic> json) {
+ /* factory  Request.fromJson(Map<String, dynamic> json) {
     return  Request(
       id: json['id'],
       rno: json['rno'],
@@ -358,7 +316,26 @@ Request({required this.id,required this.rno,required this.rcode,required this.rm
       rstatus: json['rstatus'],
        rfile: json['rfile'],
     );
-  }
+  }*/
+  factory Request.fromJson(Map<String, dynamic> json) {
+  return Request(
+    id: json['id'] ?? '',  // Provide default values if necessary
+    rno: json['rno'] ?? '',
+    rcode: json['rcode'] ?? '',
+    rmount: (json['rmount'] as num?)?.toDouble() ?? 0.0,
+    withdrawnmount: (json['withdrawnmount'] as num?)?.toDouble() ?? 0.0,
+    rcurrency: json['rcurrency'] ?? '',
+    rpurpose: json['rpurpose'] ?? '',
+    requester_id: json['requester_id'] ?? 0,
+    rdate: json['rdate'] ?? '',
+    approver1_id: json['approver1_id'] ?? 0,
+    approver2_id: json['approver2_id'] ?? 0,
+    approver3_id: json['approver3_id'] ?? 0,
+    approver_date: json['approver_date'] ?? '',
+    rstatus: json['rstatus'] ?? '',
+    rfile: json['rfile'] ?? '',
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
@@ -434,3 +411,42 @@ class Payment {
   }
 }
 
+class SettlementInfo{
+    String paymentid;
+  final String settlementDate;
+  final int WithdrawnAmount;
+   final int settleamount;
+  final int refundamount;
+  final String settled;
+ 
+ 
+    SettlementInfo({required this.paymentid, required this.settlementDate, required this.WithdrawnAmount, required this.settleamount, required this.refundamount, required this.settled});
+ 
+ 
+  factory SettlementInfo.fromJson(Map<String,dynamic> json){
+   
+    return SettlementInfo(
+      paymentid: json['payment id'],
+      settlementDate: json['Settlement Date'],
+      WithdrawnAmount: json['Withdrawn Amount'],
+      settleamount : json['Settlement Amount'],
+      refundamount: json['Refund Amount'],
+      settled: json['Settled'],
+     
+    );
+  }
+ 
+  Map<String,dynamic> toJson(){
+    return{
+        'payment id': paymentid,
+      'Settlement Date': settlementDate,
+      'Withdrawn Amount': WithdrawnAmount,
+      'Settlement Amount': settleamount,
+      'Refund Amount': refundamount,
+      'Settled': settled,
+     
+ 
+    };
+  }
+ 
+}

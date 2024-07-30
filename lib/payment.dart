@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-//import 'data.dart';
 import 'api_service.dart'; // Make sure this is the correct import path for your ApiService
 import 'dart:math';
 class PaymentScreen extends StatefulWidget {
@@ -20,13 +19,12 @@ class PaymentScreenState extends State<PaymentScreen> {
       color: Color.fromARGB(255, 0, 0, 0),
       
     );
-     bool paymentposttable=true;
-      bool paymentdrafttable=false;
-   //List<Payment> payment = getpayment();
-    List<Payment> payment =[];
-String filter = '';
-  bool _sortAscending = true;
-  int _sortColumnIndex = 0;
+       bool paymentposttable=true;
+       bool paymentdrafttable=false;
+       List<Payment> payment =[];
+       String filter = '';
+       bool _sortAscending = true;
+       int _sortColumnIndex = 0;
 
 String? _fileName;
   String? _filePath;
@@ -109,21 +107,7 @@ String generateRandomString(int length) {                                   // a
                     width: 200,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                                      /*  GestureDetector(
-                          onTap: showRequestDialog,
-                          child: AbsorbPointer(
-                            child: TextField(
-                              controller: pnoController,
-                              decoration: InputDecoration(
-                                labelText: 'Payment No',
-                                border: OutlineInputBorder(),
-                              ),
-                              readOnly: true,
-                            ),
-                          ),
-                        ),*/
-                                            GestureDetector(
+                      children: [ GestureDetector(
                       onTap: () {
                         showRequestDialog(context, pnoController, wmountController);
                       },
@@ -407,226 +391,7 @@ void showRequestDialog(BuildContext context, TextEditingController pnoController
     },
   );
 }
-/*
-void _editPayment(Payment payment)  {
-  // Create a TextEditingController for each field you want to edit
-  TextEditingController pno_edit = TextEditingController(text: payment.pno);
-  TextEditingController wdmount_edit = TextEditingController(text: payment.wdmount.toString());
-  TextEditingController pdate_edit = TextEditingController(text: "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}");
-  TextEditingController pmount_edit = TextEditingController(text: payment.pmount.toString());
-  TextEditingController pnote_edit = TextEditingController(text: payment.pnote);
-  TextEditingController precive_edit = TextEditingController(text: payment.preceive);
-  TextEditingController ppaid_edit = TextEditingController(text: payment.ppaid);
-  String pmethod_edit=payment.pmethod;
-  // Show a dialog to edit payment details
-    showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text('Edit Payment Form'),
-            content: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  SizedBox(width: 80),
-                  Container(
-                    width: 200,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                                       
-                             TextField(
-                              controller: pno_edit,
-                              decoration: InputDecoration(
-                                labelText: 'Payment No',
-                                border: OutlineInputBorder(),
-                              ),
-                              readOnly: true,
-                            ),
-                        
-                        SizedBox(height: 30),
-                        TextField(
-                          controller: wdmount_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Withdrawable Amount',
-                            border: OutlineInputBorder(),
-                          ),
-                          readOnly: true,
-                        ),
-                        SizedBox(height: 30),
-                        TextField(
-                          controller: pmount_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Payment Amount',
-                            border: OutlineInputBorder(),
-                          ),
-                        
-                        ),
-                        SizedBox(height: 30),
-                        TextField(
-                          controller: pnote_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Payment Note',
-                            border: OutlineInputBorder(),
-                          ), 
-                        ),
-                       
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 80),
-                  Container(
-                    width: 200,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: pdate_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Payment Date',
-                            border: OutlineInputBorder(),
-                          ),
-                          readOnly: true,
-                        ),
-                        SizedBox(height: 30),
-                        DropdownButtonFormField<String>(
-                value: pmethod_edit,
-                items: ['Bank', 'Cash','Cheque']
-                    .map((pmethod_edit) => DropdownMenuItem(
-                          value: pmethod_edit,
-                          child: Text(pmethod_edit),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                  pmethod_edit = value;
-                  }
-                },        
-              ),
-                SizedBox(height: 30),
-                        TextField(
-                          controller: precive_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Received Person',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 30),
-                        TextField(
-                          controller: ppaid_edit,
-                          decoration: InputDecoration(
-                            labelText: 'Paid Person',
-                            border: OutlineInputBorder(),
-                          ),
-                          
-                        ),
-                        SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: pickFile,
-                          child: Text('Pick a File'),
-                        ),
-                        SizedBox(height: 10),
-                        Text(_fileName != null
-                            ? 'File name: $_fileName'
-                            : 'No file selected'),
-                        Text(_filePath != null
-                            ? 'File path: $_filePath'
-                            : ''),
-                      
 
-                      
-                      ],
-                    ),
-                  ),
-
-       
-
-                 
-                  SizedBox(width: 80),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  // Validation for empty or whitespace-only fields
-                  String pmountStr = pmount_edit.text.trim();
-                  String pnote = pnote_edit.text.trim();
-                  String rperson = precive_edit.text.trim();
-                  String paidperson = ppaid_edit.text.trim();
-                  
-                  if (
-                      pmountStr.isEmpty ||
-                      pnote.isEmpty ||
-                      rperson.isEmpty ||
-                      paidperson.isEmpty) {
-                    // Show error message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('All fields must be filled out.'),
-                      ),
-                    );
-                    return;
-                  }
-                  double wmount = double.tryParse(wdmount_edit.text) ?? 0.0;
-                  double pmount = double.tryParse(pmount_edit.text) ?? 0.0;
-
-                  if (pmount > wmount) {
-                    // Show an error message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('withdrawable amount cannot be less than the Payment amount.'),
-                      ),
-                    );
-                    return;
-                  } 
-                    // Proceed with submission
-                   // Navigator.of(context).pop();
-                    
-                try {
-                  Payment updatedPayment = Payment(
-                    id:payment.id, 
-                    pno: pno_edit.text,
-                    pdate:pdate_edit.text,
-                    pmethod: pmethod_edit,
-                    wdmount: wmount,
-                    pmount: pmount,
-                    pcurrency: '',
-                    pstatus: 'Posted',
-                    pnote:  pnote_edit.text,
-                    preceive: rperson,
-                    ppaid: paidperson,
-                    pfile: _fileName ?? '',
-                  );
-                 await ApiService().updatePayment(updatedPayment);
-                    setState(() {
-                      // int index = payment.indexWhere((p) => p.id == updatedPayment.id);
-                      // if (index != -1) {
-                      //   payment[index] = updatedPayment;
-                      // }
-                    });
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    print('Failed to update payment: $e');
-                  }
-                },
-                child: Text('Submit'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}*/
 void _editPayment(Payment payment) {
   // Create a TextEditingController for each field you want to edit
   TextEditingController pno_edit = TextEditingController(text: payment.pno);
@@ -835,10 +600,15 @@ void _deletePayment(Payment payment) async {
 
   // Delete the payment if confirmation is true
   if (confirmDelete == true) {
+    try {
+      await ApiService().deletePayment(payment.id);
     setState(() {
       // Assuming `payment` is part of your `payment` list, remove it
-    //  payment.remove(payment);
+      filteredPayment.remove(payment);
     });
+     } catch (e) {
+      print('Failed to delete payment: $e');
+    }
   }
 }
 
@@ -1075,46 +845,6 @@ SizedBox(
   }
 }
  
-
-
-// advance request Table Widget
-
-/*class RequestTable extends StatelessWidget {
-  final List<Request> requests;
-  final void Function(String) onRowSelected;
-
-  const RequestTable({required this.requests, required this.onRowSelected, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return DataTable(
-      columns: [
-        DataColumn(label: Text('Request No')),
-        DataColumn(label: Text('Purpose of request')),
-        DataColumn(label: Text('Request Amount')),
-        DataColumn(label: Text('Withdraw Amount')),
-      
-      ],
-      rows: requests.map((request) {
-        return DataRow(
-          cells: [
-            DataCell(Text(request.rno)),
-            DataCell(Text(request.rpurpose)),     
-            DataCell(Text(request.rmount.toString())),
-            DataCell(Text(request.withdrawnmount.toString())),
-          ],
-          onSelectChanged: (bool? selected) {
-            if (selected ?? false) {
-              onRowSelected(request.rno);
-              //onRowSelected(request.withdrawnmount);
-              Navigator.of(context).pop();
-            }
-          },
-        );
-      }).toList(),
-    );
-  }
-}*/
 class RequestTable extends StatefulWidget {
   final void Function(String) onRowSelected;
 

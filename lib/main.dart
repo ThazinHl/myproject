@@ -186,7 +186,7 @@ import 'package:myproject/payment.dart';
 import 'budget_code_screen.dart';
 import 'project.dart';
 import 'request.dart';
-
+import 'settlement.dart';
 
 void main(){
   runApp(MyApp());
@@ -223,7 +223,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     Projectinfo(),
     RequestScreen(),
     PaymentScreen(),
-    Center(child: (Text('Settlement')),),
+    //Center(child: (Text('Settlement')),),
+    Settlement(),
 
   ];
 

@@ -35,11 +35,11 @@
       "rcurrency": "MMK",
       "rpurpose": "First project request",
       "requester_id": 1,
-      "rdate": "8-7-2024",
+      "rdate": "2024-7-8",
       "approver1_id": 1,
       "approver2_id": 2,
       "approver3_id": 3,
-      "approver_date": "10-7-2024",
+      "approver_date": "2024-7-10",
       "rstatus": "Approved",
       "rfile": "r.jpg"
     },
@@ -52,12 +52,12 @@
       "rcurrency": "MMK",
       "rpurpose": "For second project request",
       "requester_id": 2,
-      "rdate": "8-7-2024",
+      "rdate": "2024-7-10",
       "approver1_id": 2,
       "approver2_id": 2,
       "approver3_id": 3,
       "approver_date": "",
-      "rstatus": "Pending",
+      "rstatus": "Approved",
       "rfile": "ee.jpg"
     },
     {
@@ -69,13 +69,30 @@
       "rcurrency": "USD",
       "rpurpose": "First Trip request",
       "requester_id": 1,
-      "rdate": "8-7-2024",
+      "rdate": "2024-7-12",
       "approver1_id": 1,
       "approver2_id": 2,
       "approver3_id": 3,
-      "approver_date": "10/7/2024",
+      "approver_date": "2024-7-15",
       "rstatus": "Rejected",
       "rfile": "rt.jpg"
+    },
+    {
+      "id": "knjo",
+      "rno": "Req-2425-004",
+      "rcode": "TRP-2425-001",
+      "rmount": 100000,
+      "withdrawnmount": 0,
+      "rcurrency": "MMK",
+      "rpurpose": "fhfj",
+      "requester_id": 0,
+      "rdate": "2024-7-29",
+      "approver1_id": 0,
+      "approver2_id": 0,
+      "approver3_id": 0,
+      "approver-date": "",
+      "rstatus": "Pending",
+      "pfile": ""
     }
   ],
   "projects": [
@@ -105,7 +122,7 @@
       "pcurrency": "MMK",
       "apmount": 0,
       "pstatus": "Active",
-      "preq": "no"
+      "preq": "yes"
     },
     {
       "id": "3",
@@ -246,18 +263,29 @@
       "pfile": "R.jfif"
     },
     {
-      "id": "xvfe",
-      "pno": "Req-2425-003-1",
-      "pdate": "2024-7-28",
-      "pmethod": "Bank",
-      "wdmount": 300,
-      "pmount": 100,
+      "id": "fvg2",
+      "pno": "Req-2425-002-4",
+      "pdate": "2024-7-29",
+      "pmethod": "Cash",
+      "wdmount": 100000,
+      "pmount": 10000,
       "pcurrency": "",
       "pstatus": "Draft",
-      "pnote": "for party",
-      "preceive": "Hla",
-      "ppaid": "Yee",
-      "pfile": "R.jfif"
+      "pnote": "for buying books",
+      "preceive": "Zaw",
+      "ppaid": "Kyaw",
+      "pfile": "monfood.txt"
+    }
+  ],
+  "settlements": [
+    {
+      "payment id": "1",
+      "Settlement Date": "3-4-2024",
+      "Withdrawn Amount": 3000,
+      "Settlement Amount": 2500,
+      "Refund Amount": 500,
+      "Settled": "yes",
+      "id": "3292"
     }
   ]
 }
